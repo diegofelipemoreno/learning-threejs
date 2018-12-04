@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.01 - Basic Scene</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/d3-threeD.js"></script>
+    <script type="text/javascript" src="../libs/MTLLoader.js"></script>
+    <script type="text/javascript" src="../libs/OBJMTLLoader.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+</head>
+
+<body>
+    <div class="main-container">
+    <!--
+        <div class="image-container">
+            <img class="image" src="./img/plane.jpg" />
+        </div>
+    -->
+        <div id="WebGL-output"></div>
+    </div>
+   <div class="container"></div>
+
+   <style>
+    body {
+        background: grey;
+    }
+
+    .container {
+        height: 2000px;
+        background: white;
+    }
+    #WebGL-output {
+        position: -webkit-sticky; /* http://caniuse.com/#feat=css-sticky */
+        position: sticky;
+        top: 0; /* tell this element where to stick */
+    }
+
+    .main-container {
+        border: 2px solid blue;
+        height: 2000px;
+    }
+
+    .image-container {
+        position: fixed;
+        left: 22.1%;
+        top: 121px;
+        z-index: 1;
+        width: 353px;
+        height: 260px;
+        transform: skew(7deg, -0.5deg);
+        overflow: hidden;
+    }
+
+    .image-container:after {
+        content: '';
+        position: absolute;
+        background-color: black;
+        height: 30px;
+        width: 110%;
+        z-index: 9999;
+        bottom: -20px;
+        transform: skew(7deg, -1.5deg);
+    }
+
+    .image {
+        width: 100%;
+    }
+   </style>
+
+    <script type="text/javascript">
+ 
+        var flagCover = false;
+        var coverContainer = document.querySelector('#WebGL-output');
+        var pantalla = "./img/plane.jpg";
+        window.addEventListener('scroll', function () {
+
+            if (window.pageYOffset > 80) flagCover = true;
+
+            if (window.pageYOffset >= 0 && window.pageYOffset <= 80) flagCover = false;
+        });
+
+        (function mobileElement() {
+            var scene,
+                camera,
+                box,
+                renderer = new THREE.WebGLRenderer({ 
+                    alpha: true,
+                    antialiasing: true
+                }),
+                plane,
+                myscreen,
+                controls,
+                spotLight2,
+                group = new THREE.Object3D();
+
+            function sceneElement() {
+                var _scene = new THREE.Scene();
+
+                return _scene;
+            };
+
+            function planeElement() {
+                var planeGeometry = new THREE.PlaneGeometry(600, 200, 20, 20),
+                    planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }),
+                    _plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+                _plane.receiveShadow = true;
+                _plane.rotation.x = -0.5 * Math.PI;
+                _plane.position.set(15, -5, 0);
+                scene.add(_plane);
+
+                return _plane;
+            }
+
+            function boxElement() {
+                var loader = new THREE.OBJMTLLoader(),
+                    pivot = new THREE.Group(),
+                    _box;
+
+                loader.load('../assets/imac/Mac_2.obj', '../assets/imac/Mac_2.mtl', function (object) {
+                    _box = new THREE.Box3().setFromObject(object);
+                    _box.center(object.position);
+                    object.scale.set(2, 2, 2);
+                    object.position.set(0, 1, 0);
+                    group.add(object);
+                    group.rotation.set(.05, 0, 0);
+                    pivot.add(group);
+                    scene.add(pivot);
+                });
+
+                return pivot;
+            }
+
+            function screen() {
+                var boxGeometry,
+                    boxMaterial,
+                    mobileTexture = THREE.ImageUtils.loadTexture(pantalla),
+                    _box;
+
+                boxGeometry = new THREE.BoxGeometry(2.7, 5.5, 0.001);
+                boxMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    map: mobileTexture,
+                });
+
+                _box = new THREE.Mesh(boxGeometry, boxMaterial);
+                _box.name = 'androidMobile';
+                _box.scale.set(2.2, .6, 1);
+                _box.position.set(-.06, 4.2, .29);
+                _box.rotation.set(0, 0, 0);
+                group.add(_box);
+                return _box;
+            }
+
+            function cameraElement() {
+                var _camera = new THREE.PerspectiveCamera(5, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+                // position and point the camera to the center of the scene
+                _camera.position.set(0, 0, 100);
+                _camera.lookAt(new THREE.Vector3(0, 2, 0));
+                _camera.name = 'perspective';
+                scene.add(_camera);
+
+                return _camera;
+            }
+
+            function cameraOrthographic() {
+                var _camera = new THREE.OrthographicCamera(window.innerWidth / -16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / -16, -200, 500);
+                _camera.position.set(160, 80, 200);
+                _camera.lookAt(scene.position);
+                _camera.name = "orthographic";
+
+                return _camera;
+            }
+
+            function spotlight() {
+                // add spotlight for the shadows
+                var _spotLight = new THREE.SpotLight(0xcccccc);
+
+                //_spotLight.shadowCameraVisible = true;
+                _spotLight.shadowCameraNear = 80;
+                _spotLight.shadowCameraFov = 5;
+                _spotLight.shadowCameraFar = 400;
+                _spotLight.name = 'spotLight';
+                _spotLight.position.set(100, 100, 250);
+                _spotLight.shadowMapWidth = 1024;
+                _spotLight.shadowMapHeight = 1024;
+                //_spotLight.castShadow = true;
+                _spotLight.target = group;
+                scene.add(_spotLight);
+
+                return _spotLight;
+            }
+
+            function spotlight2() {
+                var pointColor = "#c4c4c4",
+                    _spotLight2 = new THREE.SpotLight(pointColor);
+
+                _spotLight2.shadowCameraVisible = true;
+                _spotLight2.shadowCameraNear = 60;
+                _spotLight2.shadowCameraFov = 5;
+                _spotLight2.shadowCameraFar = 500;
+                _spotLight2.name = 'spotLight2';
+                _spotLight2.intensity = 0.4;
+                _spotLight2.shadowMapWidth = 1024;
+                _spotLight2.shadowMapHeight = 1024;
+                _spotLight2.position.set(120, 180, 360);
+                _spotLight2.castShadow = true;
+                _spotLight2.target = group;
+                scene.add(_spotLight2);
+
+                return _spotLight2;
+            }
+
+            function directionalLight() {
+                var pointColor = "#cccccc";
+                var directionalLight = new THREE.DirectionalLight(pointColor);
+
+                directionalLight.position.set(-40, 60, -10);
+                directionalLight.castShadow = true;
+                directionalLight.shadowCameraNear = 2;
+                directionalLight.shadowCameraFar = 200;
+                directionalLight.shadowCameraLeft = -50;
+                directionalLight.shadowCameraRight = 50;
+                directionalLight.shadowCameraTop = 50;
+                directionalLight.shadowCameraBottom = -50;
+                directionalLight.distance = 0;
+                directionalLight.intensity = 0.5;
+                directionalLight.shadowMapHeight = 1024;
+                directionalLight.shadowMapWidth = 1024;
+
+                scene.add(directionalLight);
+            }
+
+            function controller() {
+                var gui = new dat.GUI(),
+                    _controls;
+
+                _controls = new function () {
+                    this.perspective = "Perspective";
+                    this.switchCamera = function () {
+
+                        if (camera.name === 'perspective') {
+                            camera = cameraOrthographic();
+                        } else {
+                            camera = cameraElement();
+                        }
+                    };
+                };
+                gui.add(_controls, 'switchCamera');
+                gui.add(_controls, 'perspective').listen();
+
+                return _controls;
+            }
+
+            function render() {
+                renderer.alpha = true;
+                renderer.setClearColor(0x000000, 0);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMapEnabled = true;
+
+                // add the output of the renderer to the html element
+                document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+                // rotate the cubes around its axes
+                scene.traverse(function (e) {
+
+                    if (flagCover && group.position.x > -3.6) {
+                        group.rotation.y += 0.0005;
+                        group.position.y -= 0.0025;
+                        group.position.x -= 0.0025;
+                        group.scale.x += 0.0004;
+                        group.scale.y += 0.0004;
+                        group.scale.z += 0.0004; 
+                    } 
+
+                    if (!flagCover && group.position.x < 0) {
+                        group.rotation.y -= 0.0005;
+                        group.position.y += 0.0025;
+                        group.position.x += 0.0025;
+                        group.scale.x -= 0.0004;
+                        group.scale.y -= 0.0004;
+                        group.scale.z -= 0.0004;
+                    } 
+                });
+
+                // render using requestAnimationFrame
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+
+                // Resize camera when browser changes
+                window.addEventListener('resize', function () {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                }, false);
+            }
+
+            function init() {
+                scene = sceneElement();
+                plane = planeElement();
+                box = boxElement();
+                myscreen = screen();
+                camera = cameraElement();
+                controls = controller();
+                directionalLight();
+                spotlight();
+                spotlight2();
+                render();
+                window.pantalla = myscreen;
+
+                window.addEventListener('scroll', function () {
+
+                    if (window.pageYOffset > 200) myscreen.material.map.image.src = "./img/square.jpg";
+                    if (window.pageYOffset > 600) myscreen.material.map.image.src = "./img/plane.jpg";
+
+                    console.log(myscreen.material.map);
+                });
+            }
+
+            init();
+        })();
+
+    </script>
+</body>
+
+</html>

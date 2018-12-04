@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.01 - Basic Scene</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+
+</head>
+<body>
+
+<!-- Div which will hold the Output -->
+<div id="WebGL-output"></div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    (function cameras() {
+        var scene,
+            camera,
+            cameraOrthographic,
+            renderer = new THREE.WebGLRenderer(),
+            sphere,
+            box,
+            controls;
+
+        function sceneElement () {
+            var _scene = new THREE.Scene();
+
+            return _scene;
+        };
+
+        function sphereElement() {
+            var sphereGeometry = new THREE.SphereGeometry(4, 20, 20),
+                sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x7777ff }),
+                sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+            // position the sphere
+            sphere.position.set(0, 10, 0);
+            sphere.castShadow = true;
+            //sphere.visible = false;
+            // add the sphere to the scene
+            scene.add(sphere);
+            
+            return sphere;
+        }
+
+        function boxElement() {
+            var cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+
+            for (var j = 0; j < 10; j++) {
+                for (var i = 0; i < 10; i++) {
+                    var rnd = Math.random() * 0.75 + 0.25;
+                    var cubeMaterial = new THREE.MeshLambertMaterial();
+                    cubeMaterial.color = new THREE.Color(rnd, 0, 0);
+                    var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+                    cube.position.z = j * 3;
+                    cube.position.x = i * 3;
+                    cube.position.y = 2;
+
+                    scene.add(cube);
+                }
+            }
+            
+            return cube;
+        }
+
+        function cameraElement() {
+            var _camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            _camera.name = 'perspective';
+            // position and point the camera to the center of the scene
+            _camera.position.x = 120;
+            _camera.position.y = 60;
+            _camera.position.z = 180;
+            _camera.lookAt(new THREE.Vector3(0, 10, 0));
+
+            scene.add(_camera);
+
+            return _camera;
+        }
+
+        function cameraOrthographic() {
+            var _camera = new THREE.OrthographicCamera(window.innerWidth / -16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / -16, -200, 500);
+            _camera.position.x = 120;
+            _camera.position.y = 60;
+            _camera.position.z = 180;
+
+            _camera.lookAt(scene.position);
+            _camera.name = "orthographic";
+
+            return _camera;
+        }
+
+        function spotlightElement() {
+            // add spotlight for the shadows
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(-40, 60, -10);
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+        }
+
+        function controller() {
+            var gui = new dat.GUI(),
+                _controls;
+
+            _controls = new function () {
+                this.perspective = "Perspective";
+                this.switchCamera = function () {
+                    console.log(camera);
+
+                    if (camera.name === 'perspective') {
+                        camera = cameraOrthographic();
+                    } else {
+                        camera = cameraElement();
+                    }
+                };
+            };
+
+            gui.add(_controls, 'switchCamera');
+            gui.add(_controls, 'perspective').listen();
+
+            return _controls;
+        }
+        
+        function render() {            
+            renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMapEnabled = true;
+
+            // add the output of the renderer to the html element
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+        function init() {
+            scene = sceneElement();
+            box = boxElement();
+            sphere = sphereElement();
+            camera = cameraElement();
+            controls = controller();
+            spotlightElement();
+            render();
+        }
+        
+        init();
+    })();
+
+</script>
+</body>
+</html>

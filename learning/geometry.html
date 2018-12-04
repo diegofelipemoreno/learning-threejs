@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.01 - Basic Scene</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+
+</head>
+<body>
+
+<!-- Div which will hold the Output -->
+<div id="WebGL-output"></div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    (function geometry() {
+        var scene,
+            camera,
+            renderer = new THREE.WebGLRenderer(),
+            plane;
+
+        function sceneElement () {
+            var _scene = new THREE.Scene();
+
+            return _scene;
+        };
+
+         function planeElement() {
+            // create the ground plane
+            var planeGeometry = new THREE.PlaneGeometry(40, 40),
+                planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }),
+                _plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+            _plane.receiveShadow = true;
+            // rotate and position the plane
+            _plane.rotation.x = -0.5 * Math.PI;
+            _plane.position.x = 0;
+            _plane.position.y = 0;
+            _plane.position.z = 0;
+
+            // add the plane to the scene
+            scene.add(_plane);
+
+            return _plane;
+        }
+
+        function cubeElement() {
+            var vertices,
+                faces,
+                geom,
+                materials,
+                mesh;
+            
+            vertices = [
+                new THREE.Vector3(1, 2, 1),
+                new THREE.Vector3(1, 2, -1),
+                new THREE.Vector3(1, -1, 1),
+                new THREE.Vector3(1, -1, -1),
+                new THREE.Vector3(-1, 2, -1),
+                new THREE.Vector3(-1, 2, 1),
+                new THREE.Vector3(-1, -1, -1),
+                new THREE.Vector3(-1, -1, 1)
+            ];
+
+            faces = [
+                new THREE.Face3(0, 2, 1),
+                new THREE.Face3(2, 3, 1),
+                new THREE.Face3(4, 6, 5),
+                new THREE.Face3(6, 7, 5),
+                new THREE.Face3(4, 5, 1),
+                new THREE.Face3(5, 0, 1),
+                new THREE.Face3(7, 6, 2),
+                new THREE.Face3(6, 3, 2),
+                new THREE.Face3(5, 7, 0),
+                new THREE.Face3(7, 2, 0),
+                new THREE.Face3(1, 3, 4),
+                new THREE.Face3(3, 6, 4),
+            ];
+
+            geom = new THREE.Geometry();
+            geom.vertices = vertices;
+            geom.faces = faces;
+            geom.computeFaceNormals();
+
+            materials = [
+                new THREE.MeshLambertMaterial({ opacity: 0.6, color: 0x44ff44, transparent: true }),
+                new THREE.MeshBasicMaterial({ color: 0x000000 })
+
+            ];
+
+            mesh = THREE.SceneUtils.createMultiMaterialObject(geom, materials);
+            mesh.children.forEach(function (e) {
+                e.castShadow = true
+            });
+            //mesh.children[0].position.x = 3;
+            //mesh.rotation.set(0.5 * Math.PI, 0, 0);
+            scene.add(mesh);
+        }
+
+        function cameraElement() {
+            var _camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            // position and point the camera to the center of the scene
+            _camera.position.x = -30;
+            _camera.position.y = 10;
+            _camera.position.z = 30;
+            _camera.lookAt(scene.position);
+            scene.add(_camera);
+
+            return _camera;
+        }
+
+        function spotlightElement() {
+            // add spotlight for the shadows
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(-40, 60, -10);
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+        }
+        
+        function render() {            
+            renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMapEnabled = true;
+
+            // add the output of the renderer to the html element
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+            // rotate the cubes around its axes
+            scene.traverse(function (e) {
+
+                if (e instanceof THREE.Mesh && e != plane) {
+                   // e.position.x += 0.01;
+                    //console.log(e);
+                   // e.visible = false;
+                }
+            });
+
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+        function init() {
+            scene = sceneElement();
+            plane = planeElement();
+            cube = cubeElement();
+            camera = cameraElement();
+            spotlightElement();
+            render();
+        }
+        
+        init();
+    })();
+
+</script>
+</body>
+</html>

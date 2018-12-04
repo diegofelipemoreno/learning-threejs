@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.01 - Basic Scene</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+</head>
+<body>
+
+<!-- Div which will hold the Output -->
+<div id="WebGL-output"></div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    (function basicScene() {
+        var scene,
+            camera,
+            renderer = new THREE.WebGLRenderer(),
+            plane,
+            controls;
+
+        function sceneElement () {
+            var _scene = new THREE.Scene();
+
+            _scene.fog = new THREE.Fog(0xffffff, 0.015, 100);
+            _scene.overrideMaterial = new THREE.MeshPhongMaterial({
+                color:
+                    0xff0000
+            });
+
+            return _scene;
+        };
+
+        function planeElement() {
+            // create the ground plane
+            var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1),
+                planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff}),
+                plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+            plane.receiveShadow = true;
+            // rotate and position the plane
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.x = 0;
+            plane.position.y = 0;
+            plane.position.z = 0;
+
+            // add the plane to the scene
+            scene.add(plane);
+            controls = cubeController(planeGeometry);
+            
+            return plane;
+        }
+
+        function cameraElement() {
+            var _camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            // position and point the camera to the center of the scene
+            _camera.position.x = -30;
+            _camera.position.y = 40;
+            _camera.position.z = 30;
+            _camera.lookAt(scene.position);
+            scene.add(_camera);
+
+            return _camera;
+        }
+
+        function lightElement() {
+            // add subtle ambient lighting
+            var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+            scene.add(ambientLight);
+        }
+
+        function spotlightElement() {
+            // add spotlight for the shadows
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(-40, 60, -10);
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+        }
+        
+        function cubeController(planeGeometry) {
+            var gui = new dat.GUI(),
+                _controls;
+            
+            _controls = new function () {
+                this.rotationSpeed = 0.02;
+                this.numberOfObjects = scene.children.length;
+
+                this.removeCube = function () {
+                    var allChildren = scene.children;
+                    var lastObject = allChildren[allChildren.length - 1];
+                    if (lastObject instanceof THREE.Mesh) {
+                        scene.remove(lastObject);
+                        this.numberOfObjects = scene.children.length;
+                    }
+                };
+
+                this.addCube = function () {
+                    var cubeSize = Math.ceil((Math.random() * 3)),
+                        cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize),
+                        cubeMaterial = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff}),
+                        cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+                    cube.castShadow = true;
+                    cube.name = "cube-" + scene.children.length;
+
+                    // position the cube randomly in the scene
+                    cube.position.x = -30 + Math.round((Math.random() * planeGeometry.parameters.width));
+                    cube.position.y = Math.round((Math.random() * 5));
+                    cube.position.z = -20 + Math.round((Math.random() * planeGeometry.parameters.height));
+
+                    // add the cube to the scene
+                    scene.add(cube);
+                    this.numberOfObjects = scene.children.length;
+
+                    scene.children.forEach(element => {
+                        if (element.name === 'cube-10') {
+                            console.log(element);
+                        }
+                    });
+                };
+
+                this.outputObjects = function () {
+                    console.log(scene.children);
+                }
+            };
+            
+            gui.add(_controls, 'rotationSpeed', 0, 0.5);
+            gui.add(_controls, 'addCube');
+            gui.add(_controls, 'removeCube');
+            gui.add(_controls, 'outputObjects');
+            gui.add(_controls, 'numberOfObjects').listen();
+                        
+            return _controls;
+        }
+
+        function render() {            
+            renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMapEnabled = true;
+
+            // add the output of the renderer to the html element
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+            // rotate the cubes around its axes
+            scene.traverse(function (e) {
+
+                if (e instanceof THREE.Mesh && e != plane) {
+                    e.rotation.x += controls.rotationSpeed;
+                    e.rotation.y += controls.rotationSpeed;
+                    e.rotation.z += controls.rotationSpeed;
+                }
+            });
+
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+        function init() {
+            scene = sceneElement();
+            plane = planeElement();
+            camera = cameraElement();
+            lightElement();
+            spotlightElement();
+            render();
+        }
+        
+        init();
+    })();
+
+</script>
+</body>
+</html>

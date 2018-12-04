@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>WebGL - Three.js</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <link href="mystyles.css" rel="stylesheet">
+</head>
+
+<body>
+    <h1>WebGL - Three.js</h1>
+    
+    <h2>Elements on a scene</h2>
+    <ul>
+        <li>Renderer</li>
+        <li>Scene</li>
+        <li>Camera</li>
+        <li>Light</li>
+        <li>Plane</li>
+        <li>Shape</li>
+    </ul>
+
+    <hr>
+
+    <h2>3 basic elements for a scene</h2>
+    <div class="container">
+        <div class="cols">
+            <h2>Setting Renderer</h2>
+            <code>
+                const renderer = new THREE.WebGLRenderer();
+                <br>
+                <br>
+                renderer.setClearColor(new THREE.Color('0xEEEEEE'));<br>
+                renderer.setSize(window.innerWidth, window.innerHeight); <br>
+                renderer.shadowMapEnabled = true; <br><br>
+                document.getElementById('WebGL-output').appendChild(renderer.domElement);<br><br>
+                renderer.render(scene, camera);<br>
+            </code>
+        </div>
+        <div class="cols">
+            <h2>Setting the Scene</h2>
+            <code>
+                let _scene = new THREE.Scene();
+            </code>
+        </div>
+        <div class="cols">
+            <h2>Setting the Camera</h2>
+            <code>
+                let _camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                <br>
+                <br>
+                _camera.position.x = -30;<br>
+                _camera.position.y = 40;<br>
+                _camera.position.z = 30;<br>
+                _camera.lookAt(scene.position);<br>
+
+                <bold>scene.add(_camera);</bold>
+            </code>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="col2">
+            <h2>Setting a Plane (Geometry, Material, Mesh)</h2>
+            <code>
+                let planeGeometry = new THREE.PlaneGeometry(60, 40),<br>
+                    planeMaterial = new THREE.MeshLambertMaterial({color: 0xffff00}),<br>
+                    _plane = new THREE.Mesh(planeGeometry, planeMaterial);<br>
+                <br>
+                <br>
+                _plane.receiveShadow = true;<br>
+                _plane.rotation.x = -0.5 * Math.PI;<br>
+                _plane.position.y = 0;<br>
+                _plane.position.z = 0;<br>
+                <bold>scene.add(_plane);</bold>
+
+            </code>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+         <div class="col2">
+            <h2>Setting the Light</h2>
+            <code>
+                        let spotLight = new THREE.SpotLight(0xffffff);
+                        <br>
+                        <br>
+                        spotLight.position.set(-40, 60, -10);
+                        <br>
+                        spotLight.castShadow = true;<br>
+                        <bold>scene.add(spotLight);</bold>
+                    </code>
+        </div>
+    </div>
+    
+    <hr>
+
+    <div class="container">
+        <div class="col2">
+            <h2>Setting a Shape (Geometry, Material, Mesh)</h2>
+            <code>
+                let cubeGeometry = new THREE.BoxGeometry(10, 10, 10),<br>
+                    cubeMaterial = new THREE.MeshLambertMaterial({ color: 'blue' }),<br>
+                    _cube = new THREE.Mesh(cubeGeometry, cubeMaterial);<br>
+                    <br>
+                    _cube.position.set(0, 10, 0);
+                    _cube.castShadow = true;
+                    <bold>scene.add(_cube);</bold>
+                </code>
+        </div>
+    </div>
+
+    <hr>
+        
+    <div class="container">
+        <div class="col2">
+            <h2>Setting animation</h2>
+            <code>
+                square.rotation.x += 0.01;<br>
+                square.rotation.y += 0.01;<br>
+                square.rotation.z += 0.01;<br>
+                <br>
+                requestAnimationFrame(render);
+            </code>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function my3d() {
+            let scene,
+                camera,
+                renderer = new THREE.WebGLRenderer(),
+                plane,
+                square,
+                light;
+      
+            function squareElement () {
+                let cubeGeometry = new THREE.BoxGeometry(10, 10, 10),
+                    cubeMaterial = new THREE.MeshLambertMaterial({ color: 'blue' }),
+                    cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+                cube.position.set(0, 10, 0);
+                cube.castShadow = true;
+                scene.add(cube);
+
+                return cube;
+            }
+
+            function planeElement() {
+                let planeGeometry = new THREE.PlaneGeometry(60, 40),
+                    planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffff00 }),
+                    plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+                plane.receiveShadow = true;
+                plane.rotation.x = -0.5 * Math.PI;
+                plane.position.y = 0;
+                plane.position.z = 0;
+
+                scene.add(plane);
+
+                return plane;
+            }
+
+            function cameraElement() {
+                let _camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                
+                _camera.position.x = -30;
+                _camera.position.y = 40;
+                _camera.position.z = 30;
+                _camera.lookAt(scene.position);
+                scene.add(_camera);
+
+                return _camera;
+            }
+
+            function spotlightElement() {
+                let spotLight = new THREE.SpotLight(0xffffff);
+                spotLight.position.set(-40, 60, -10);
+                spotLight.castShadow = true;
+                scene.add(spotLight);
+            }
+
+            function sceneElement() {
+                let _scene = new THREE.Scene();
+
+                //_scene.fog = new THREE.Fog(0xffffff, 0.015, 100);
+
+                return _scene;
+            };
+
+            function render() {
+                renderer.setClearColor(new THREE.Color(0xEEEEEE));
+                renderer.setSize(window.innerWidth/2, window.innerHeight/2);
+                renderer.shadowMapEnabled = true;
+
+                document.getElementById("WebGL-output").appendChild(renderer.domElement);
+                
+                square.rotation.x += 0.01;
+                square.rotation.y += 0.01;
+                square.rotation.z += 0.01;
+
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+            }
+
+
+            function init() {
+                scene = sceneElement();
+                camera = cameraElement();
+                light = spotlightElement();
+                plane = planeElement();
+                square = squareElement();
+                render();
+            }
+
+            init();
+        })();
+
+    </script>
+</body>
+
+</html>

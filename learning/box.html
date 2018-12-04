@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.01 - Basic Scene</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/d3-threeD.js"></script>
+    <script type="text/javascript" src="../libs/MTLLoader.js"></script>
+    <script type="text/javascript" src="../libs/OBJMTLLoader.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+
+</head>
+
+<body>
+
+    <!-- Div which will hold the Output -->
+    <button class="js-button1">Iniciar1</button>
+    <button class="js-button2">Iniciar2</button>
+    <button class="js-button3">Iniciar3</button>
+
+    <div id="batman" style="display:none">
+        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1152px"
+            height="1152px" xml:space="preserve">
+            <g>
+                <path id="batman-path" style="fill:rgb(0,0,0);" d="M39,68c0,2.761-2.239,5-5,5H5c-2.761,0-5-2.239-5-5V5c0-2.761,2.239-5,5-5h29c2.761,0,5,2.239,5,5V68z"
+                />
+            </g>
+        </svg>
+    </div>
+    <div id="WebGL-output"></div>
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+
+        // once everything is loaded, we run our Three.js stuff.
+        (function mobileElement() {
+            var scene,
+                camera,
+                box,
+                renderer = new THREE.WebGLRenderer(),
+                plane,
+                controls,
+                buttonInit1 = document.querySelector('.js-button1'),
+                buttonInit2 = document.querySelector('.js-button2'),
+                buttonInit3 = document.querySelector('.js-button3'),
+                flag1 = false,
+                flag2 = false,
+                flag3 = false,
+                spotLight2,
+                group = new THREE.Object3D(),
+                myscreen;
+
+            function sceneElement() {
+                var _scene = new THREE.Scene();
+
+                return _scene;
+            };
+
+            function planeElement() {
+                var planeGeometry = new THREE.PlaneGeometry(600, 200, 20, 20),
+                    planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }),
+                    _plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+                _plane.receiveShadow = true;
+                _plane.rotation.x = -0.5 * Math.PI;
+                _plane.position.set(15, -5, 0);
+                scene.add(_plane);
+
+                return _plane;
+            }
+
+            function screen() {
+                var boxGeometry,
+                    boxMaterial,
+                    mobileTexture = THREE.ImageUtils.loadTexture("../assets/textures/android_texture.jpg"),
+                    _box;
+
+                boxGeometry = new THREE.BoxGeometry(2.7, 5.5, 0.001);
+                boxMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    map: mobileTexture,
+                });
+
+                _box = new THREE.Mesh(boxGeometry, boxMaterial);
+                _box.name = 'androidMobile';
+                _box.position.set(0.1, 0.12, 0.04);
+                _box.rotation.set(1.58, 0,  -0.5 * Math.PI);
+                group.add(_box);
+
+                return _box;
+            }
+
+            function boxElement() {
+                /*
+                var boxGeometry,
+                    boxMaterial,
+                    mobileTexture = THREE.ImageUtils.loadTexture("../assets/textures/android_texture.jpg"),
+                    cubeMaterial,
+                    materials = [],
+                    _box;
+
+
+                materials.push(new THREE.MeshLambertMaterial({ color: 0xffffff, metal: true, shininess: 200, })); // right face
+                materials.push(new THREE.MeshLambertMaterial({ color: 0xffffff, metal: true, shininess: 200, })); // left face
+                materials.push(new THREE.MeshLambertMaterial({ color: 0xffffff, metal: true, shininess: 200, })); // top face
+                materials.push(new THREE.MeshLambertMaterial({ color: 0xffffff, metal: true, shininess: 200, })); // bottom face
+                materials.push(new THREE.MeshLambertMaterial({
+                    color: 0xffffff,
+                    metal: true,
+                    //transparent: true,
+                    needsUpdated: true,
+                    //specular: 0xb9b9b9,
+                    shininess: 300,
+                    // map: mobileTexture,
+                })); // front face
+                materials.push(new THREE.MeshLambertMaterial({ color: 0xffffff, metal: true, shininess: 200, })); // back face
+
+                cubeMaterial = new THREE.MeshFaceMaterial(materials);
+                boxGeometry = new THREE.BoxGeometry(3, 6.5, 0.2);
+                boxMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    metal: true,
+                    //transparent: true,
+                    needsUpdated: true,
+                    //specular: 0xb9b9b9,
+                    shininess: 200,
+                    map: mobileTexture,
+                });
+
+                _box = new THREE.Mesh(boxGeometry, boxMaterial);
+                _box.name = 'androidMobile';
+                _box.position.set(0, -1, 0);
+                _box.rotation.x = -1;
+                _box.castShadow = true;
+                scene.add(_box);
+
+                return _box;
+                */
+/*
+                var shape,
+                    mobileTexture = THREE.ImageUtils.loadTexture("../assets/textures/android_texture.jpg"),
+                    texture = new THREE.Texture("../assets/textures/android_texture.jpg"),
+                    options = {
+                        amount: 1.5,
+                        bevelThickness: 1.5,
+                        bevelSize: 10,
+                        bevelSegments: 100,
+                        bevelEnabled: false,
+                        curveSegments: 100,
+                        steps: 1
+                    },
+                    boxMaterial;
+
+
+                texture.wrapS = THREE.ClampToEdgeWrapping;
+                texture.wrapT = THREE.ClampToEdgeWrapping;
+                texture.repeat.set(0.1, 0.1);
+
+                boxMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    metal: true,
+                    //transparent: true,
+                    needsUpdated: true,
+                    specular: 0xb9b9b9,
+                    shininess: 200,
+                    //map: texture,
+                });
+
+
+                function drawShape() {
+                    var svgString = document.querySelector("#batman-path").getAttribute("d"),
+                        _shape = transformSVGPathExposed(svgString);
+
+                    return _shape;
+                }
+
+                function createMesh(geom) {
+                    var mesh;
+
+                    mesh = new THREE.Mesh(geom, boxMaterial)
+                    mesh.position.set(0, 0, 0);
+                    mesh.scale.set(0.07, 0.07, 0.07);
+                    THREE.GeometryUtils.center(geom);
+                    console.log(mobileTexture);
+                    return mesh;
+                }
+
+                shape = createMesh(new THREE.ExtrudeGeometry(drawShape(), options));
+                shape.castShadow = true;
+                group.add(shape);
+
+                group.position.set(0, -2.2, -6);
+                group.rotation.set(-0.5 * Math.PI, 0, 0);
+                scene.add(group);
+                return group;
+*/
+
+                var loader = new THREE.OBJMTLLoader(),
+                    pivot = new THREE.Group(),
+                    _box;
+
+                loader.load('../assets/models/prime.obj', '../assets/models/prime.mtl', function (object) {
+                    _box = new THREE.Box3().setFromObject(object);
+                    _box.center(object.position);
+                    object.scale.set(1, 1, 1);
+                    object.position.multiplyScalar(- 1);
+                    group.add(object);
+                    group.rotation.set(0.1, 0.5 * Math.PI, 0.5 * Math.PI);
+                    pivot.add(group);
+                    scene.add(pivot);
+                });
+
+                return pivot;
+            }
+
+            function cameraElement() {
+                var _camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+                // position and point the camera to the center of the scene
+                _camera.position.x = 0;
+                _camera.position.y = -1;
+                _camera.position.z = 10;
+                _camera.lookAt(new THREE.Vector3(0, 0, 0));
+                _camera.name = 'perspective';
+                scene.add(_camera);
+
+                return _camera;
+            }
+
+            function cameraOrthographic() {
+                var _camera = new THREE.OrthographicCamera(window.innerWidth / -16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / -16, -200, 500);
+                _camera.position.x = 120;
+                _camera.position.y = 60;
+                _camera.position.z = 180;
+
+                _camera.lookAt(scene.position);
+                _camera.name = "orthographic";
+
+                return _camera;
+            }
+
+            function spotlight() {
+                // add spotlight for the shadows
+                var _spotLight = new THREE.SpotLight(0xcccccc);
+
+                //_spotLight.shadowCameraVisible = true;
+                _spotLight.shadowCameraNear = 80;
+                _spotLight.shadowCameraFov = 5;
+                _spotLight.shadowCameraFar = 400;
+                _spotLight.name = 'spotLight';
+                _spotLight.position.set(100, 100, 250);
+                _spotLight.shadowMapWidth = 1024;
+                _spotLight.shadowMapHeight = 1024;
+                //_spotLight.castShadow = true;
+                _spotLight.target = group;
+                scene.add(_spotLight);
+
+                return _spotLight;
+            }
+
+            function spotlight2() {
+                var pointColor = "#c4c4c4",
+                    _spotLight2 = new THREE.SpotLight(pointColor);
+
+                _spotLight2.shadowCameraVisible = true;
+                _spotLight2.shadowCameraNear = 60;
+                _spotLight2.shadowCameraFov = 5;
+                _spotLight2.shadowCameraFar = 500;
+                _spotLight2.name = 'spotLight2';
+                _spotLight2.intensity = 0.4;
+                _spotLight2.shadowMapWidth = 1024;
+                _spotLight2.shadowMapHeight = 1024;
+                _spotLight2.position.set(120, 180, 360);
+                _spotLight2.castShadow = true;
+                _spotLight2.target = group;
+                scene.add(_spotLight2);
+
+                return _spotLight2;
+            }
+
+            function directionalLight() {
+                var pointColor = "#cccccc";
+                var directionalLight = new THREE.DirectionalLight(pointColor);
+
+                directionalLight.position.set(-40, 60, -10);
+                //directionalLight.castShadow = true;
+                /*             directionalLight.shadowCameraNear = 2;
+                                directionalLight.shadowCameraFar = 200;
+                                directionalLight.shadowCameraLeft = -50;
+                                directionalLight.shadowCameraRight = 50;
+                                directionalLight.shadowCameraTop = 50;
+                                directionalLight.shadowCameraBottom = -50;
+                */
+                directionalLight.distance = 0;
+                directionalLight.intensity = 0.5;
+                directionalLight.shadowMapHeight = 1024;
+                directionalLight.shadowMapWidth = 1024;
+
+
+                scene.add(directionalLight);
+            }
+
+            function controller() {
+                var gui = new dat.GUI(),
+                    _controls;
+
+                _controls = new function () {
+                    this.perspective = "Perspective";
+                    this.switchCamera = function () {
+
+                        if (camera.name === 'perspective') {
+                            camera = cameraOrthographic();
+                        } else {
+                            camera = cameraElement();
+                        }
+                    };
+                };
+
+                gui.add(_controls, 'switchCamera');
+                gui.add(_controls, 'perspective').listen();
+
+                return _controls;
+            }
+
+            function render() {
+                renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMapEnabled = true;
+
+                // add the output of the renderer to the html element
+                document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+                // rotate the cubes around its axes
+                scene.traverse(function (e) {
+
+                    if (flag1) {
+                        group.position.y += 0.01;
+                        group.rotation.x += 0.01;
+                    }
+
+                    if (group.rotation.x >= 0) {
+                        flag1 = false;
+                    }
+
+                    if (flag2) {
+                        group.position.x -= 0.035;
+                        group.rotation.y += 0.01;
+                        group.rotation.z += 0.01;
+
+                        // box.rotation.z += 0.01;
+                        if (group.position.x <= -5) {
+                            group.position.x = -5;
+                        }
+                        if (group.rotation.y >= 0.8) {
+                            group.rotation.y = 0.8;
+                        }
+                        if (group.rotation.z >= 0.2) {
+                            group.rotation.z = 0.2;
+                        }
+                        setTimeout(() => {
+                            //flag2 = false;
+                        }, 120);
+                    }
+
+
+                    if (flag3) {
+                        box.position.x += 0.035;
+                        box.rotation.y -= 0.008;
+                        box.rotation.z -= 0.003;
+
+                        setTimeout(() => {
+                            // flag3 = false;
+                        }, 200);
+                    }
+                    group.rotation.y += 0.0001;   
+                });
+
+                // render using requestAnimationFrame
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+
+                // Resize camera when browser changes
+                window.addEventListener('resize', function () {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                }, false);
+            }
+
+            function triggers() {
+
+                buttonInit1.addEventListener('click', function () {
+                    //flag1 = true;
+                    group.rotation.z += 0.05;
+                    console.log(group.rotation);
+                });
+
+                buttonInit2.addEventListener('click', function () {
+                   // flag2 = true;
+                    //group.rotation.z += 0.05;
+                    group.rotation.y += 0.05;
+                    console.log(group.rotation);
+                });
+
+                buttonInit3.addEventListener('click', function () {
+                    //flag3 = true;
+                    myscreen.rotation.x += 0.01;            
+                    console.log(myscreen.rotation);
+                });
+
+             
+            }
+
+            function init() {
+                scene = sceneElement();
+                plane = planeElement();
+                box = boxElement();
+                camera = cameraElement();
+                controls = controller();
+                directionalLight();
+                myscreen = screen();
+                spotlight();
+                spotlight2();
+                triggers();
+                render();
+                console.log(THREE);
+            }
+
+            init();
+        })();
+
+    </script>
+</body>
+
+</html>

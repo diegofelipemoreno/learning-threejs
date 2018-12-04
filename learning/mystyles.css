@@ -1,0 +1,49 @@
+code {
+    font-family: Arial, Helvetica, sans-serif;
+    display: block;
+    padding: 4px 5px;
+    font-size: 15px;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 3px;
+    border: 1px solid #efdfe3;
+    margin: 10px 0 20px 0;
+    clear: both;
+    line-height: 20px;
+    text-align: left; 
+}
+
+code span {
+    color: #3F9343;
+    font-family: inherit;
+    font-size: 13px;
+    font-size: 0.8125rem; 
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cols {
+    padding: 10px;
+}
+
+.cols h2 {
+    display: block;
+    width: 100%;
+}
+
+.col1 img {
+    width: 100%;
+}
+
+.col1,
+.col2 {
+    margin: 10px;
+    width: 50%;
+}
+
+bold {
+    font-weight: bold;
+}
